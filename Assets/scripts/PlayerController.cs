@@ -4,13 +4,16 @@ using Unity.VisualScripting;
 using UnityEditor.Tilemaps;
 using UnityEngine;
 
-public class movement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
 
     private float movementInputDirection;
     private float jumpTimer;
     private float turnTimer;
     private float wallJumpTimer;
+    private float dashTimeLeft;
+    private float lastImageXpos;
+    private float lastDash = -100f;
 
     private int amountOfJumpsLeft;
     private int facingDirection = 1;
@@ -27,7 +30,15 @@ public class movement : MonoBehaviour
     private bool checkJumpMultiplier;
     private bool canMove;
     private bool canFlip;
-    private bool hasWallJumped;  
+    private bool hasWallJumped;
+    private bool isTouchingLedge;
+    private bool canClimbLedge = false;
+    private bool ledgeDetected;
+    private bool isDashing;
+
+    private Vector2 ledgePosBot;
+    private Vector2 ledgePos1;
+    private Vector2 ledgePos2;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -47,12 +58,21 @@ public class movement : MonoBehaviour
     public float jumpTimerSet = 0.15f;
     public float turnTimerSet = 0.1f;
     public float wallJumpTimerSet = 0.5f;
+    public float ledgeClimbXOffset1 = 0f;
+    public float ledgeClimbYOffset1 = 0f;
+    public float ledgeClimbXOffset2 = 0f;
+    public float ledgeClimbYOffset2 = 0f;
+    public float dashTime = 0.2f;
+    public float dashSpeed = 50f;
+    public float distanceBetweenImages = 0.1f;
+    public float dashCoolDown = 2.5f;
 
     public Vector2 wallHopDirection;
     public Vector2 wallJumpDirection;
 
     public Transform groundCheck;
     public Transform wallCheck;
+    public Transform ledgeCheck;
 
     public LayerMask whatIsGround;
     private void Start()
@@ -70,7 +90,9 @@ public class movement : MonoBehaviour
         CheckMovementDirection();
         CheckIfCanJump();
         CheckIfWallSliding();
+        //CheckLedgeClime(); needs a ledge climb animation
         CheckJump();
+        CheckDash();
     }
 
     private void FixedUpdate()
@@ -81,7 +103,7 @@ public class movement : MonoBehaviour
 
     private void CheckIfWallSliding()
     {
-        if(isTouchingWall && movementInputDirection == facingDirection && rb.linearVelocityY < 0)
+        if(isTouchingWall && movementInputDirection == facingDirection && rb.linearVelocityY < 0 && !canClimbLedge)
         {
             isWallSliding = true;
         }
@@ -91,11 +113,57 @@ public class movement : MonoBehaviour
         }
     }
 
+    private void CheckLedgeClime()
+    {
+        if(ledgeDetected && !canClimbLedge)
+        {
+            canClimbLedge = true;
+
+            if (isFacingRight)
+            {
+                ledgePos1 = new Vector2(Mathf.Floor(ledgePosBot.x + wallCheckDistance) - ledgeClimbXOffset1, Mathf.Floor(ledgePosBot.y) + ledgeClimbYOffset1);
+                ledgePos2 = new Vector2(Mathf.Floor(ledgePosBot.x + wallCheckDistance) + ledgeClimbXOffset2, Mathf.Floor(ledgePosBot.y) + ledgeClimbYOffset2);
+            }
+            else
+            {
+                ledgePos1 = new Vector2(Mathf.Ceil(ledgePosBot.x - wallCheckDistance) + ledgeClimbXOffset1, Mathf.Ceil(ledgePosBot.y) + ledgeClimbYOffset1);
+                ledgePos2 = new Vector2(Mathf.Ceil(ledgePosBot.x - wallCheckDistance) - ledgeClimbXOffset2, Mathf.Ceil(ledgePosBot.y) + ledgeClimbYOffset2);
+            }
+
+            canMove = false;
+            canFlip = false;
+
+            //anim.SetBool("canClimbLedge", canClimbLedge); when animations are added. uncomment this
+        }
+
+        if (canClimbLedge)
+        {
+            transform.position = ledgePos1;
+        }
+    }
+
+    public void FinishLedgeClimb() //this is used when the animation finishes
+    {
+        canClimbLedge = false;
+        transform.position = ledgePos2;
+        canMove = true;
+        canFlip = true;
+        ledgeDetected = false;
+        //anim.SetBool("canClimbLedge", canClimbLedge); when animations are added. uncomment this
+    }
+
     private void CheckSurrounding() 
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
 
         isTouchingWall = Physics2D.Raycast(wallCheck.position, transform.right, wallCheckDistance, whatIsGround);
+        isTouchingLedge = Physics2D.Raycast(ledgeCheck.position, transform.right, wallCheckDistance, whatIsGround);
+
+        if(isTouchingWall && !isTouchingLedge && !ledgeDetected)
+        {
+            ledgeDetected = true;
+            ledgePosBot = wallCheck.position;
+        }
     }
 
     private void CheckIfCanJump()
@@ -130,7 +198,7 @@ public class movement : MonoBehaviour
             Flip();
         }
 
-        if(rb.linearVelocityX != 0)
+        if (Mathf.Abs(rb.linearVelocityX) >= 0.01f)
         {
             isWalking = true;
         }
@@ -156,7 +224,6 @@ public class movement : MonoBehaviour
         {
             if (isGrounded || (amountOfJumpsLeft > 0 && isTouchingWall))
             {
-                print("NormalJump was called");
                 NormalJump();
             }
             else
@@ -171,7 +238,6 @@ public class movement : MonoBehaviour
             print("checking something");
             if (!isGrounded && movementInputDirection != facingDirection)
             {
-                print("can Move and can Flip should be false");
                 canMove = false;
                 canFlip = false;
 
@@ -179,7 +245,7 @@ public class movement : MonoBehaviour
             }
         }
 
-        if (!canMove)
+        if (turnTimer >= 0)
         {
             turnTimer -= Time.deltaTime;
 
@@ -195,17 +261,58 @@ public class movement : MonoBehaviour
             checkJumpMultiplier = false;
             rb.linearVelocity = new Vector2(rb.linearVelocityX, rb.linearVelocityY * variableJumpHeightMultiplier);
         }
+
+        if (Input.GetButtonDown("Dash"))
+        {
+            if(Time.time >= (lastDash + dashCoolDown))
+            AttemptToDash();
+        }
+    }
+
+    private void AttemptToDash()
+    {
+        isDashing = true;
+        dashTimeLeft = dashTime;
+        lastDash = Time.time;
+
+        PlayerAfterImagePool.Instance.GetFromPool();
+        lastImageXpos = transform.position.x;
+    }
+
+    private void CheckDash()
+    {
+        if (isDashing)
+        {
+            if(dashTimeLeft > 0)
+            {
+                canMove = false;
+                canFlip = false;
+                rb.linearVelocity = new Vector2(dashSpeed * facingDirection, 0f);
+                dashTimeLeft -= Time.deltaTime;
+
+                if (Mathf.Abs(transform.position.x - lastImageXpos) > distanceBetweenImages)
+                {
+                    PlayerAfterImagePool.Instance.GetFromPool();
+                    lastImageXpos = transform.position.x;
+                }
+            }
+
+            if(dashTimeLeft <= 0 || isTouchingWall)
+            {
+                isDashing = false;
+                canMove = true;
+                canFlip = true;
+            }
+        }
     }
 
     private void CheckJump()
     {
         if(jumpTimer > 0)
         {
-            print("jumpTimer > 0");
             //wallJump
             if (!isGrounded && isTouchingWall && movementInputDirection != 0 && movementInputDirection != facingDirection)
             {
-                print("WallJump was called");
                 WallJump();
             }
             else if (isGrounded)
@@ -252,7 +359,6 @@ public class movement : MonoBehaviour
     {
         if (canWallJump)
         {
-            print("should be wall jumping");
             rb.linearVelocity = new Vector2(rb.linearVelocityX, 0.0f);
             isWallSliding = false;
             amountOfJumpsLeft = amountOfJumps;

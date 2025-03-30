@@ -396,6 +396,82 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1734017458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &780800755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 780800756}
+  m_Layer: 0
+  m_Name: LedgeCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &780800756
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780800755}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.827, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1734017458}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &808184073
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 808184075}
+  - component: {fileID: 808184074}
+  m_Layer: 0
+  m_Name: PlayerAfterImagePool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &808184074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808184073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4374f93e5365cfb49814873c04575df9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  afterImagePrefab: {fileID: 1151058062181742587, guid: 6b966731ba0fbc2479a4e6b1ee0b955d, type: 3}
+--- !u!4 &808184075
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808184073}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1162967630
 GameObject:
   m_ObjectHideFlags: 0
@@ -1262,10 +1338,11 @@ GameObject:
   - component: {fileID: 1734017457}
   - component: {fileID: 1734017456}
   - component: {fileID: 1734017462}
+  - component: {fileID: 1734017463}
   - component: {fileID: 1734017461}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1367,6 +1444,8 @@ Transform:
   m_Children:
   - {fileID: 531790850}
   - {fileID: 633742082}
+  - {fileID: 780800756}
+  - {fileID: 1870435534}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1734017461
@@ -1381,6 +1460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f92b48ac21ec11c4e964517e6528515d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  amountOfJumps: 1
   movementSpeed: 9
   jumpForce: 20
   groundCheckRadius: 0.25
@@ -1394,10 +1474,19 @@ MonoBehaviour:
   jumpTimerSet: 0.15
   turnTimerSet: 0.1
   wallJumpTimerSet: 0.5
+  ledgeClimbXOffset1: 0.3
+  ledgeClimbYOffset1: 0
+  ledgeClimbXOffset2: 0.5
+  ledgeClimbYOffset2: 0
+  dashTime: 0.2
+  dashSpeed: 50
+  distanceBetweenImages: 0.05
+  dashCoolDown: 2.5
   wallHopDirection: {x: 1, y: 1}
   wallJumpDirection: {x: 1, y: 2}
   groundCheck: {fileID: 531790850}
   wallCheck: {fileID: 633742082}
+  ledgeCheck: {fileID: 780800756}
   whatIsGround:
     serializedVersion: 2
     m_Bits: 256
@@ -1447,6 +1536,56 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.9, y: 1.9}
   m_EdgeRadius: 0.02
+--- !u!114 &1734017463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1734017455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f23604f2bbe3d6e4c8a11aac9aec198d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockEnable: 1
+  inputTimer: 1
+  blockBoxPos: {fileID: 1870435534}
+  blockBoxSize: {x: 1.2, y: 1.7}
+  whatIsBlockable:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!1 &1870435533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1870435534}
+  m_Layer: 0
+  m_Name: BlockBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1870435534
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870435533}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1734017458}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1454,3 +1593,4 @@ SceneRoots:
   - {fileID: 83261018}
   - {fileID: 1734017458}
   - {fileID: 1443538258}
+  - {fileID: 808184075}
