@@ -211,13 +211,13 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimations() 
     {
-        anim.SetBool("isStanding", isWalking);
-        //anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isWalking", isWalking);
+        //Debug.Log(rb.linearVelocityX)
+        anim.SetBool("isStanding", !isWalking);
         anim.SetBool("isDashing", isDashing);
         anim.SetBool("isWallSliding", isWallSliding);
-        anim.SetBool("isJumpingUp", isAttemptingToJump);
-        anim.SetBool("isJumpingDown", isGrounded);
-        anim.SetFloat("yVelocity", rb.linearVelocityY);
+        anim.SetBool("isJumpingUp", jumpTimer > 0 && isGrounded);
+        //anim.SetFloat("yVelocity", rb.linearVelocityY);
     }
 
     private void CheckInput()
