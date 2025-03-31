@@ -84,8 +84,14 @@ public class PlayerController : MonoBehaviour
         wallJumpDirection.Normalize();
     }
 
+    private void ResetAnimTriggers()
+    {
+        anim.ResetTrigger("jump");
+    }
+
     private void Update()
     {
+        ResetAnimTriggers();
         CheckInput();
         CheckMovementDirection();
         CheckIfCanJump();
@@ -217,7 +223,9 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("isDashing", isDashing);
         anim.SetBool("isWallSliding", isWallSliding);
         anim.SetBool("isJumpingUp", jumpTimer > 0 && isGrounded);
-        //anim.SetFloat("yVelocity", rb.linearVelocityY);
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("yVelocity", rb.linearVelocityY);
+        Debug.Log("yvel "+rb.linearVelocityY);
     }
 
     private void CheckInput()
@@ -356,6 +364,7 @@ public class PlayerController : MonoBehaviour
             jumpTimer = 0;
             isAttemptingToJump = false;
             checkJumpMultiplier = true;
+            anim.SetTrigger("jump");
         }
     }
 
@@ -381,6 +390,7 @@ public class PlayerController : MonoBehaviour
             hasWallJumped = true;
             wallJumpTimer = wallJumpTimerSet;
             lastWallJumpDirection = -facingDirection;
+            anim.SetTrigger("jump");
         }
     }
     private void ApplyMovement()
