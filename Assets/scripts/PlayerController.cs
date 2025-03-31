@@ -93,6 +93,7 @@ public class PlayerController : MonoBehaviour
         //CheckLedgeClime(); needs a ledge climb animation
         CheckJump();
         CheckDash();
+        UpdateAnimations();
     }
 
     private void FixedUpdate()
@@ -210,9 +211,12 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimations() 
     {
-        anim.SetBool("isWalking", isWalking);
-        anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isStanding", isWalking);
+        //anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isDashing", isDashing);
         anim.SetBool("isWallSliding", isWallSliding);
+        anim.SetBool("isJumpingUp", isAttemptingToJump);
+        anim.SetBool("isJumpingDown", isGrounded);
         anim.SetFloat("yVelocity", rb.linearVelocityY);
     }
 
