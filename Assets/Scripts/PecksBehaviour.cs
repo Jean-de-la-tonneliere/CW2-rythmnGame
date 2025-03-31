@@ -128,9 +128,9 @@ public class PecksBehaviour : MonoBehaviour
             transform.position = new Vector3(0, 0, 0);
         }
     }
-    private void OnDrawGizmos()
+/*    private void OnDrawGizmos()
     {
         groundDetectionBoxPos = new Vector2(deadGO.transform.position.x + boxOffsetX, deadGO.transform.position.y + boxOffsetY);
         Gizmos.DrawWireCube(groundDetectionBoxPos, groundDetectionBoxSize);
-    }
+    }*/
 }
