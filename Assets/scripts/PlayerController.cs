@@ -212,7 +212,6 @@ public class PlayerController : MonoBehaviour
     private void UpdateAnimations() 
     {
         anim.SetBool("isWalking", isWalking);
-        //Debug.Log(rb.linearVelocityX)
         anim.SetBool("isStanding", !isWalking);
         anim.SetBool("isDashing", isDashing);
         anim.SetBool("isWallSliding", isWallSliding);
