@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,7 +20,7 @@ public class PlayerController : MonoBehaviour
     private int amountOfJumpsLeft;
     private int facingDirection = 1;
     private int lastWallJumpDirection;
-    private int livesCount = 1;
+    private int livesCount = 0;
     
     private bool isFacingRight = true;
     private bool isWalking;
@@ -90,8 +93,9 @@ public class PlayerController : MonoBehaviour
 
     private void ResetAnimTriggers()
     {
-        anim.ResetTrigger("jump");
-        anim.ResetTrigger("Attack");
+        //anim.ResetTrigger("jump");
+        //anim.ResetTrigger("Attack");
+        //anim.ResetTrigger("Damage");
     }
 
     private void Update()
@@ -250,10 +254,6 @@ public class PlayerController : MonoBehaviour
         wallJumpMiniDelay--;
 
 
-        //if (Input.GetButtonDown("Attack"))
-        //{
-        //    anim.SetTrigger("Attack");
-        //}
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -301,6 +301,12 @@ public class PlayerController : MonoBehaviour
         {
             if(Time.time >= (lastDash + dashCoolDown))
             AttemptToDash();
+        }
+
+        if (Input.GetButtonDown("Attack"))
+        {
+            anim.SetTrigger("Attack");
+            Debug.Log("ATTACK");
         }
     }
 
@@ -446,7 +452,6 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(rb.linearVelocityX, -wallSlideSpeed);
             }
         }
-        Debug.Log("XX " + movementInputDirection + ", " + facingDirection);
     }
 
     private void Flip()
@@ -459,6 +464,28 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void AddLife()
+    {
+        if (livesCount < 3)
+        {
+            livesCount++;
+            GameObject.Find("Life indicator " + livesCount).GetComponent<UnityEngine.UI.Image>().enabled = true;
+        }
+
+    }
+    public void Damage()
+    {
+        if (livesCount > 0)
+        {
+            GameObject.Find("Life indicator " + livesCount).GetComponent<UnityEngine.UI.Image>().enabled = false;
+            livesCount--;
+            anim.SetTrigger("Damage");
+            rb.AddForce(new Vector2 (-25f, 20f), ForceMode2D.Impulse);
+        }
+
+
+    }
+
     public int getLivesCount()
     {
         return this.livesCount;
@@ -469,5 +496,23 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
         Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y, wallCheck.position.z));
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag.Equals("Life"))
+        {
+            AddLife();
+            Destroy(other.gameObject);
+        }
+        
+    }
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.tag.Equals("Enemy"))
+        {
+            Damage();
+            Destroy(other.gameObject);
+        }
     }
 }

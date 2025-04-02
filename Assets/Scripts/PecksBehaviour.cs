@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PecksBehaviour : MonoBehaviour
 {
-    [SerializeField] Transform Player;
+    Transform Player;
 
     public float offsetX = 0f, offsetY = 0f, knockbackSpeedX, knockbackSpeedY, knockbackTorque, boxOffsetX = 0f, boxOffsetY = 0f;
     public float spawnCooldown = 10f;
@@ -24,66 +24,109 @@ public class PecksBehaviour : MonoBehaviour
     [SerializeField]
     private GameObject aliveGO, deadGO;
     private Rigidbody2D rbDead;
+    private Rigidbody2D rb;
+    private BeatSynchronizer beat;
 
     public LayerMask whatIsGround;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        spawnTiming = Time.time + spawnCooldown;
+        //spawnTiming = Time.time + spawnCooldown;
+        Player = GameObject.FindGameObjectWithTag("Player").transform;
 
-        rbDead = deadGO.GetComponent<Rigidbody2D>();
+        //rbDead = deadGO.GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
+        beat = GetComponent<BeatSynchronizer>();
+        beat.OnBeatAction += OnBeat;
 
-        aliveGO.SetActive(false);
-        deadGO.SetActive(false);
 
-        groundDetectionBoxPos = new Vector2(deadGO.transform.position.x + boxOffsetX, deadGO.transform.position.y + boxOffsetY);
+        //aliveGO.SetActive(false);
+        //deadGO.SetActive(false);
+
+        //groundDetectionBoxPos = new Vector2(deadGO.transform.position.x + boxOffsetX, deadGO.transform.position.y + boxOffsetY);
+    }
+
+    private float smallChaseTimer = 0f;
+    int beats = 0;
+
+    void OnBeat()
+    {
+        if (Vector3.Distance(transform.position, Player.position) < 14f)
+        {
+            if (Player.transform.position.x < transform.position.x)
+            {
+                rb.AddForce(new Vector2(-3f, 7.5f), ForceMode2D.Impulse);
+            }
+            else
+            {
+                rb.AddForce(new Vector2(3f, 7.5f), ForceMode2D.Impulse);
+            }
+            beats++;
+            if (beats % 4 == 0)
+            {
+                smallChaseTimer = 0.15f;
+            }
+        }
+        else
+        {
+            rb.AddForce(new Vector2(0f, 7.5f), ForceMode2D.Impulse);
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!hasSpawned && Time.time >= spawnTiming)
-            InitialisePeck();
 
-        if (hasSpawned)
+
+
+        //if (!hasSpawned && Time.time >= spawnTiming)
+        //    InitialisePeck();
+
+        //if (hasSpawned)
+        //{
+        //    // Debug.Log("Time : " + Time.time + " ")
+        //    if (!isAttacking)
+        //        HoverOverPlayer();
+
+        //    if (Time.time >= startAttack && !isAttacking)
+        //        isAttacking = true;
+
+        //    if (isAttacking && !isBlocked)
+        //        AttackPlayer();
+
+        //    if (isGrounded)
+        //    {
+        //        aliveGO.SetActive(false);
+        //        deadGO.SetActive(false);
+
+        //        hasSpawned = false;
+        //        isAttacking = false;
+        //        spawnTiming = Time.time + spawnCooldown;
+
+        //        transform.position = new Vector3(0, 0, 0);
+        //        aliveGO.transform.position = new Vector3(0, 0, 0);
+        //        deadGO.transform.position = new Vector3(0, 0, 0);
+
+        //        isGrounded = false;
+        //        isBlocked = false;
+        //    }
+        //}
+        if (smallChaseTimer > 0f)
         {
-            // Debug.Log("Time : " + Time.time + " ")
-            if (!isAttacking)
-                HoverOverPlayer();
-
-            if (Time.time >= startAttack && !isAttacking)
-                isAttacking = true;
-
-            if (isAttacking && !isBlocked)
-                AttackPlayer();
-
-            if (isGrounded)
-            {
-                aliveGO.SetActive(false);
-                deadGO.SetActive(false);
-
-                hasSpawned = false;
-                isAttacking = false;
-                spawnTiming = Time.time + spawnCooldown;
-
-                transform.position = new Vector3(0, 0, 0);
-                aliveGO.transform.position = new Vector3(0, 0, 0);
-                deadGO.transform.position = new Vector3(0, 0, 0);
-
-                isGrounded = false;
-                isBlocked = false;
-            }
+            smallChaseTimer -= Time.deltaTime;
+            AttackPlayer();
         }
     }
     private void FixedUpdate()
     {
-        groundDetectionBoxPos = new Vector2(deadGO.transform.position.x + boxOffsetX, deadGO.transform.position.y + boxOffsetY);
+        //groundDetectionBoxPos = new Vector2(deadGO.transform.position.x + boxOffsetX, deadGO.transform.position.y + boxOffsetY);
 
-        if (isBlocked && !isGrounded)
-            isGrounded = Physics2D.OverlapBox(groundDetectionBoxPos, groundDetectionBoxSize, 0f, whatIsGround);
-        else
-            isGrounded = false;
+        //if (isBlocked && !isGrounded)
+        //    isGrounded = Physics2D.OverlapBox(groundDetectionBoxPos, groundDetectionBoxSize, 0f, whatIsGround);
+        //else
+        //    isGrounded = false;
     }
 
     private void InitialisePeck()
@@ -123,9 +166,8 @@ public class PecksBehaviour : MonoBehaviour
             aliveGO.SetActive(false);
             hasSpawned = false;
             isAttacking = false;
-            Debug.Log("finished attacking");
             spawnTiming = Time.time + spawnCooldown;
-            transform.position = new Vector3(0, 0, 0);
+            //Destroy(gameObject);
         }
     }
 /*    private void OnDrawGizmos()
