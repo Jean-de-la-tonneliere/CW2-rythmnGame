@@ -16,6 +16,7 @@ public class GameUI : MonoBehaviour
     private void Start()
     {
         deathUI.SetActive(false);
+        endUI.SetActive(false);
         livesCountInGame.text = ":X" + (Player.getLivesCount() - 1);
     }
 
