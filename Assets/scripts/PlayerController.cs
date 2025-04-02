@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private int amountOfJumpsLeft;
     private int facingDirection = 1;
     private int lastWallJumpDirection;
+    private int livesCount = 1;
     
     private bool isFacingRight = true;
     private bool isWalking;
@@ -224,7 +225,7 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("isJumpingUp", jumpTimer > 0 && isGrounded);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("yVelocity", rb.linearVelocityY);
-        Debug.Log("yvel "+rb.linearVelocityY);
+        //Debug.Log("yvel "+rb.linearVelocityY);
     }
 
     private void CheckInput()
@@ -421,6 +422,12 @@ public class PlayerController : MonoBehaviour
             transform.Rotate(0.0f, 180.0f, 0.0f);
         }
     }
+
+    public int getLivesCount()
+    {
+        return this.livesCount;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
