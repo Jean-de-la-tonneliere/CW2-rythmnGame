@@ -44,6 +44,10 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
+    private static bool teoIsANoob = false;
+    private bool wallJumpNoInput = false;
+    private int wallJumpMiniDelay = 0;
+
     public int amountOfJumps = 1;
 
     public float movementSpeed = 10.0f;
@@ -88,6 +92,7 @@ public class PlayerController : MonoBehaviour
     private void ResetAnimTriggers()
     {
         anim.ResetTrigger("jump");
+        anim.ResetTrigger("Attack");
     }
 
     private void Update()
@@ -119,6 +124,11 @@ public class PlayerController : MonoBehaviour
         {
             isWallSliding = false;
         }
+    }
+
+    public static void toggleTeoIsANoobMode()
+    {
+        teoIsANoob = !teoIsANoob;
     }
 
     private void CheckLedgeClime()
@@ -225,14 +235,28 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("isJumpingUp", jumpTimer > 0 && isGrounded);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("yVelocity", rb.linearVelocityY);
-        //Debug.Log("yvel "+rb.linearVelocityY);
     }
 
     private void CheckInput()
     {
-        movementInputDirection = Input.GetAxisRaw("Horizontal");
+        if (!wallJumpNoInput)
+        {
+            movementInputDirection = Input.GetAxisRaw("Horizontal");
+        }
+        else if (wallJumpNoInput && wallJumpMiniDelay <= 0 && (isGrounded || isTouchingWall))
+        {
+            wallJumpNoInput = false;
+            //wallJumpMiniDelay = 10;
+        }
+        wallJumpMiniDelay--;
 
-        if(Input.GetButtonDown("Jump"))
+
+        //if (Input.GetButtonDown("Attack"))
+        //{
+        //    anim.SetTrigger("Attack");
+        //}
+
+        if (Input.GetButtonDown("Jump"))
         {
             if (isGrounded || (amountOfJumpsLeft > 0 && isTouchingWall))
             {
@@ -245,9 +269,9 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+
         if (Input.GetButtonDown("Horizontal") && isTouchingWall)
         {
-            print("checking something");
             if (!isGrounded && movementInputDirection != facingDirection)
             {
                 canMove = false;
@@ -323,7 +347,12 @@ public class PlayerController : MonoBehaviour
         if(jumpTimer > 0)
         {
             //wallJump
-            if (!isGrounded && isTouchingWall && movementInputDirection != 0 && movementInputDirection != facingDirection)
+            bool walljump = !isGrounded && isTouchingWall && movementInputDirection != 0 && movementInputDirection != facingDirection;
+            if (teoIsANoob)
+            {
+                walljump = !isGrounded && isTouchingWall && movementInputDirection != 0;
+            }
+            if (walljump)
             {
                 WallJump();
             }
@@ -377,6 +406,13 @@ public class PlayerController : MonoBehaviour
             amountOfJumpsLeft = amountOfJumps;
             amountOfJumpsLeft--;
 
+            if (teoIsANoob && movementInputDirection == facingDirection)
+            {
+                movementInputDirection *= -1f;
+                wallJumpNoInput = true;
+                wallJumpMiniDelay = 10;
+            }
+
             Vector2 forceToAdd = new Vector2(wallJumpForce * wallJumpDirection.x * movementInputDirection, wallJumpForce * wallJumpDirection.y);
             rb.AddForce(forceToAdd, ForceMode2D.Impulse);
 
@@ -411,6 +447,7 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(rb.linearVelocityX, -wallSlideSpeed);
             }
         }
+        Debug.Log("XX " + movementInputDirection + ", " + facingDirection);
     }
 
     private void Flip()
