@@ -4,14 +4,14 @@ using System.Collections;
 
 public class BPMPulse : MonoBehaviour
 {
-    public float bpm = 120f; // Set your BPM
-    public Transform target; // UI element to pulse (Text/Image)
+    public float bpm = 120f; 
+    public Transform target; 
     public Color baseColor = Color.white; // Default color
     public Color pulseColor = Color.red;  // Color on beat
 
     private float beatInterval;
     private Vector3 originalScale;
-    private Image img; // If using an Image
+    private Image img; 
 
     void Start()
     {
