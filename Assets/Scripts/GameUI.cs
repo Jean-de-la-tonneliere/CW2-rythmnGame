@@ -34,7 +34,7 @@ public class GameUI : MonoBehaviour
 
     public void GoBackToMenu()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1); //Change scene as set in the build
+        SceneManager.LoadScene(0); //Change scene as set in the build
     }
 
     public void GoToNextLevel()
