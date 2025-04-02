@@ -22,6 +22,10 @@ public class Platform : MonoBehaviour
     public Color warningColor = Color.yellow;
     public Color inactiveColor = new Color(1, 1, 1, 0.3f); // Semi-transparent
 
+
+    private float originalScaleX;
+    private float originalScaleY;
+
     private void Start()
     {
         // Setup beat synchronizer
@@ -32,32 +36,29 @@ public class Platform : MonoBehaviour
         platformCollider = GetComponent<Collider2D>();
         platformRenderer = GetComponent<SpriteRenderer>();
 
+        originalScaleX = transform.localScale.x;
+        originalScaleY = transform.localScale.y;
+
         // Initial state
         UpdateVisuals();
     }
 
     private void Update()
     {
-        // For smooth transitions, pulse with the beat
         if (beatSync != null && platformRenderer != null)
         {
-            // Calculate a pulse based on beat progress (grows and shrinks slightly)
             float beatProgress = beatSync.GetBeatProgress();
-            float pulse = 1f + Mathf.Sin(beatProgress * Mathf.PI) * 0.1f;
+            float pulse = Mathf.Sin(beatProgress * Mathf.PI) * 0.1f;
 
-            // Apply the pulse to the platform scale
-            transform.localScale = new Vector3(pulse, pulse, 1f);
+            transform.localScale = new Vector2(originalScaleX + pulse, originalScaleY + pulse);
 
-            // If platform is about to change state, flash as warning
             if (isActive && stateCounter >= activeBeatCount - 1)
             {
-                // About to disappear - flash warning color based on beat progress
                 float warningFlash = Mathf.PingPong(beatProgress * 2f, 1f);
                 platformRenderer.color = Color.Lerp(activeColor, warningColor, warningFlash);
             }
         }
     }
-
     private void OnBeat()
     {
         stateCounter++;
@@ -79,13 +80,11 @@ public class Platform : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        // Enable/disable the collider
         if (platformCollider != null)
         {
             platformCollider.enabled = isActive;
         }
 
-        // Update the visuals
         if (platformRenderer != null)
         {
             platformRenderer.color = isActive ? activeColor : inactiveColor;

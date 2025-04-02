@@ -5,6 +5,9 @@ public class SpikeBehaviour : MonoBehaviour
     private Conductor conductor;
     private BeatSynchronizer beatSync;
 
+    private Animator animator;
+
+
     // Spike movement configuration
     public float moveDistance = 1.5f;
     public float moveSpeed = 5f;
@@ -27,6 +30,8 @@ public class SpikeBehaviour : MonoBehaviour
     void Start()
     {
         conductor = Conductor.instance;
+        animator = GetComponent<Animator>();
+
 
         beatSync = gameObject.AddComponent<BeatSynchronizer>();
         beatSync.beatInterval = 1; // Trigger on every beat
@@ -79,7 +84,7 @@ public class SpikeBehaviour : MonoBehaviour
                 {
                     // Start retracting
                     currentState = SpikeState.Retracting;
-
+                    animator.SetTrigger("RetractSpike");
                     // Play retracting sound if available
                     if (retractingSound != null && audioSource != null)
                     {
@@ -129,7 +134,7 @@ public class SpikeBehaviour : MonoBehaviour
 
         // Change state to emerging
         currentState = SpikeState.Emerging;
-
+        animator.SetTrigger("SpikeTrigger");
         // Play emerging sound if available
         if (emergingSound != null && audioSource != null)
         {

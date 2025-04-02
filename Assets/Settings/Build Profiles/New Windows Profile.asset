@@ -23,7 +23,7 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/MenuScene.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/LevelScene.unity
+    m_path: Assets/Scenes/FinalScene.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []
