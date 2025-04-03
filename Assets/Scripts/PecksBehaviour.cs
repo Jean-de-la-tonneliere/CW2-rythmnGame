@@ -17,6 +17,7 @@ public class PecksBehaviour : MonoBehaviour
     private bool hasSpawned = false;
     private bool isGrounded = false;
 
+
     [SerializeField]
     private Vector2 groundDetectionBoxSize;
     private Vector2 groundDetectionBoxPos;
@@ -117,7 +118,6 @@ public class PecksBehaviour : MonoBehaviour
         {
             smallChaseTimer -= Time.deltaTime;
             AttackPlayer();
-
         }
     }
     private void FixedUpdate()
@@ -128,6 +128,11 @@ public class PecksBehaviour : MonoBehaviour
         //    isGrounded = Physics2D.OverlapBox(groundDetectionBoxPos, groundDetectionBoxSize, 0f, whatIsGround);
         //else
         //    isGrounded = false;
+    }
+
+    public bool IsChasing()
+    {
+        return smallChaseTimer > 0f;
     }
 
     private void InitialisePeck()

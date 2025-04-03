@@ -52,6 +52,8 @@ public class PlayerController : MonoBehaviour
 
     public int amountOfJumps = 1;
 
+    public Vector3 lastStandPoint = new Vector3();
+
     public float movementSpeed = 10.0f;
     public float jumpForce = 16.0f;
     public float groundCheckRadius;
@@ -175,7 +177,13 @@ public class PlayerController : MonoBehaviour
 
     private void CheckSurrounding() 
     {
+        bool beforeGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
+
+        if (!beforeGrounded && isGrounded)
+        {
+            lastStandPoint = transform.position;
+        }
 
         isTouchingWall = Physics2D.Raycast(wallCheck.position, transform.right, wallCheckDistance, whatIsGround);
         isTouchingLedge = Physics2D.Raycast(ledgeCheck.position, transform.right, wallCheckDistance, whatIsGround);
@@ -238,7 +246,19 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("isJumpingUp", jumpTimer > 0 && isGrounded);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("yVelocity", rb.linearVelocityY);
+
+        if (attackInterval > 0f)
+        {
+            attackInterval -= Time.deltaTime;
+        }
     }
+
+    public bool IsAttacking()
+    {
+        return attackInterval > 0f;
+    }
+
+    private float attackInterval = 0f;
 
     private void CheckInput()
     {
@@ -306,6 +326,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Attack"))
         {
             anim.SetTrigger("Attack");
+            attackInterval = 1f;
         }
     }
 
@@ -451,6 +472,14 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(rb.linearVelocityX, -wallSlideSpeed);
             }
         }
+
+        if (transform.position.y < -30f)
+        {
+            transform.position = lastStandPoint;
+            rb.angularVelocity = 0f;
+            rb.linearVelocity = Vector2.zero;
+            Damage();
+        }
     }
 
     private void Flip()
@@ -531,8 +560,13 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("Enemy"))
         {
-            Damage();
             Destroy(other.gameObject);
+            if (other.gameObject.GetComponent<PecksBehaviour>().IsChasing() && IsAttacking())
+            {
+                GetComponent<AudioSource>().Play();
+                return;
+            }
+            Damage();
         }
     }
 }
