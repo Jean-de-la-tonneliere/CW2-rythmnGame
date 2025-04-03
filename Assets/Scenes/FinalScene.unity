@@ -2310,7 +2310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 175c68048cb34f943be0559a197959c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Player: {fileID: 0}
+  Player: {fileID: 1935645613}
   targetEnd: {fileID: 0}
   deathUI: {fileID: 2066009058}
   endUI: {fileID: 0}

@@ -117,6 +117,7 @@ public class PecksBehaviour : MonoBehaviour
         {
             smallChaseTimer -= Time.deltaTime;
             AttackPlayer();
+
         }
     }
     private void FixedUpdate()

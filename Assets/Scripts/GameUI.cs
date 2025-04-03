@@ -23,11 +23,15 @@ public class GameUI : MonoBehaviour
     void Update()
     {
 
-        UpdatelivesCountInGame();
-        if (Player.getLivesCount() == 0)
+        if (Player.IsDed())
         {
             //Debug.Log("Go back to menu");
             deathUI.SetActive(true);
+            player.SetActive(false);
+        }
+        else if (Player.ReachedGoal())
+        {
+            endUI.SetActive(true);
             player.SetActive(false);
         }
 
@@ -46,10 +50,10 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    public void UpdatelivesCountInGame()
-    {
-        livesCountInGame.text = ":X" + (Player.getLivesCount() - 1);
-    }
+    //public void UpdatelivesCountInGame()
+    //{
+    //    livesCountInGame.text = ":X" + (Player.getLivesCount() - 1);
+    //}
 
     private void OnTriggerEnter(Collider other)
     {

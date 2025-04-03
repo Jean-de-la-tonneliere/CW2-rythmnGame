@@ -306,7 +306,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Attack"))
         {
             anim.SetTrigger("Attack");
-            Debug.Log("ATTACK");
         }
     }
 
@@ -473,6 +472,9 @@ public class PlayerController : MonoBehaviour
         }
 
     }
+
+    private bool ded = false;
+    private bool reachedGoal = false;
     public void Damage()
     {
         if (livesCount > 0)
@@ -482,6 +484,10 @@ public class PlayerController : MonoBehaviour
             anim.SetTrigger("Damage");
             rb.AddForce(new Vector2 (-25f, 20f), ForceMode2D.Impulse);
         }
+        else
+        {
+            ded = true;
+        }
 
 
     }
@@ -489,6 +495,16 @@ public class PlayerController : MonoBehaviour
     public int getLivesCount()
     {
         return this.livesCount;
+    }
+
+    public bool IsDed()
+    {
+        return ded;
+    }
+
+    public bool ReachedGoal()
+    {
+        return reachedGoal;
     }
 
     private void OnDrawGizmos()
@@ -504,6 +520,10 @@ public class PlayerController : MonoBehaviour
         {
             AddLife();
             Destroy(other.gameObject);
+        }
+        else if (other.tag.Equals("Finish"))
+        {
+            reachedGoal = true;
         }
         
     }
