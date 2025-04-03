@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private bool canClimbLedge = false;
     private bool ledgeDetected;
     private bool isDashing;
+    private bool kickEnemy;
 
     private Vector2 ledgePosBot;
     private Vector2 ledgePos1;
@@ -46,7 +47,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
-    private static bool teoIsANoob = false;
+    private static bool teoIsANoob = true;
     private bool wallJumpNoInput = false;
     private int wallJumpMiniDelay = 0;
 
@@ -57,6 +58,7 @@ public class PlayerController : MonoBehaviour
     public float movementSpeed = 10.0f;
     public float jumpForce = 16.0f;
     public float groundCheckRadius;
+    public float chickenMakerRadius;
     public float wallCheckDistance;
     public float wallSlideSpeed;
     public float movementForceInAir;
@@ -82,8 +84,10 @@ public class PlayerController : MonoBehaviour
     public Transform groundCheck;
     public Transform wallCheck;
     public Transform ledgeCheck;
+    public Transform chickenMaker;
 
     public LayerMask whatIsGround;
+    public LayerMask whatIsEnemy;
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -259,6 +263,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private float attackInterval = 0f;
+    private float attackCoolDown = 0f;
 
     private void CheckInput()
     {
@@ -323,11 +328,15 @@ public class PlayerController : MonoBehaviour
             AttemptToDash();
         }
 
-        if (Input.GetButtonDown("Attack"))
+
+        if (Input.GetButtonDown("Attack") && attackCoolDown <= 0f)
         {
             anim.SetTrigger("Attack");
-            attackInterval = 1f;
+            attackInterval = 1.5f;
+            attackCoolDown = 2.4f;
+            attack();
         }
+        attackCoolDown -= Time.deltaTime;
     }
 
     private void AttemptToDash()
@@ -524,6 +533,15 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void attack()
+    {
+        Collider2D other = Physics2D.OverlapCircle(chickenMaker.position, chickenMakerRadius, whatIsEnemy);
+        if (other) {
+            Destroy(other.gameObject);
+            GetComponent<AudioSource>().Play();
+        }
+    }
+
     public int getLivesCount()
     {
         return this.livesCount;
@@ -542,6 +560,8 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+        Gizmos.DrawWireSphere(chickenMaker.position, chickenMakerRadius);
 
         Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y, wallCheck.position.z));
     }
@@ -563,13 +583,17 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("Enemy"))
         {
-            Destroy(other.gameObject);
-            if (other.gameObject.GetComponent<PecksBehaviour>().IsChasing() && IsAttacking())
+            if (IsAttacking())
             {
+                Destroy(other.gameObject);
                 GetComponent<AudioSource>().Play();
                 return;
             }
-            Damage();
+            else if (!isDashing)
+            {
+                Destroy(other.gameObject);
+                Damage();
+            }
         }
     }
 }
