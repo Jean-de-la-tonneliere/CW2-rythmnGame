@@ -506,16 +506,19 @@ public class PlayerController : MonoBehaviour
     private bool reachedGoal = false;
     public void Damage()
     {
-        if (livesCount > 0)
+        if (!isDashing)
         {
-            GameObject.Find("Life indicator " + livesCount).GetComponent<UnityEngine.UI.Image>().enabled = false;
-            livesCount--;
-            anim.SetTrigger("Damage");
-            rb.AddForce(new Vector2 (-25f, 20f), ForceMode2D.Impulse);
-        }
-        else
-        {
-            ded = true;
+            if (livesCount > 0)
+            {
+                GameObject.Find("Life indicator " + livesCount).GetComponent<UnityEngine.UI.Image>().enabled = false;
+                livesCount--;
+                anim.SetTrigger("Damage");
+                rb.AddForce(new Vector2(-25f, 20f), ForceMode2D.Impulse);
+            }
+            else
+            {
+                ded = true;
+            }
         }
 
 

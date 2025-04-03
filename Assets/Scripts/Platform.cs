@@ -10,7 +10,7 @@ public class Platform : MonoBehaviour
     public int inactiveBeatCount = 2; // How many beats to stay inactive
 
     // Track state
-    private bool isActive = true;
+    public bool isActive = true;
     private int stateCounter = 0;
 
     // Platform components
